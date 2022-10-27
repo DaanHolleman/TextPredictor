@@ -26,38 +26,49 @@ def build_frequency(words):
     uni_ch, cnt_ch = np.unique(list(all_chars), return_counts=True)
     uni_ch = uni_ch[ cnt_ch.argsort() ]
     cnt_ch.sort()
-    
+    uni_ch = list(uni_ch)
     return uni_ch
 
-def build_freq_map(freq : list):
-    freq_map = { char:index for index, char in enumerate(freq) }
-    return freq_map
-
-def encode_word(word : str, freq_map : list, size : int = None):
+def encode_word(word : str, freq : list, size : int = 16):
     """
     Encode a word using a frequency of letters list.
     The letters will be represented by a byte that indicates the index
-    of the letter in the `freq_map` list. 
+    of the letter in the `freq` list. 
     A single byte is used per character.
-    !! The `freq_map` should not be longer than 256 entries !!
+    !! The `freq` should not be longer than 256 entries !!
     """
-    if len(freq_map) > 256:
+    if len(freq) > 256:
         raise RuntimeError("Frequency list should not be longer than 256 entries.")
-    
     # Set vector size
     if size is None: size = len(word)
-    word_bytes = bytearray() # new empty bytearray
-    
-    # iterate over characters in word
-    for char in word:
-        index = freq_map[char]
-        word_bytes.append( int(index).to_bytes(2, 'big') )
+    # match desired size
+    word = word[:size]
+    word += ' ' * (size - len(word))
+    # create integers corresponding to chars
+    word_ints = [ freq.index(char) for char in word ]
+    # create bytearray
+    word_bytes = bytearray(word_ints) # new empty bytearray
     return word_bytes
 
-words = cel.get_words()
-lengths = np.array([len(word) for word in words])
-words = words[(lengths>=1.8) * (lengths<=10.0)]
+def build_features(words : list, size : int = 16):
+    N = len(words)
+    freq = build_frequency(words)
+    features = np.zeros((N,size))
+    for index, word in enumerate(words):
+        word_ints = np.array([int(b) for b in encode_word(word, freq, size) ])
+        features[index] = word_ints
+    return features
 
-freq = build_frequency(words)
-freq_map = build_freq_map(freq)
-print( encode_word('foobar', freq_map) )
+def save_features(fname : str, features : list):
+    freq = build_frequency(words)
+    for word in words:
+        b_array = encode_word(word, freq)
+
+def load_features(fname : str):
+    freq = ...
+    features = ...
+    return words, freq
+
+
+words = cel.get_words()
+features = build_features(words, 16)

@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Word dependencies
 eldamo-0.8.4.1
 english-words

@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Word dependencies
-eldamo-0.8.4.1
-english-words
+eldamo-0.8.4.1/
+english-words/
